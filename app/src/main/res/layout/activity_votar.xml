@@ -31,12 +31,12 @@
             android:layout_height="52dp"
             android:textSize="25sp" />
 
-        <Button
+        <!--<Button
             android:id="@+id/btnVotar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/StringVotar"
-            android:textSize="25sp" />
+            android:textSize="25sp" /> -->
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/frmBtnLimitado"
@@ -45,10 +45,10 @@
             android:layout_height="wrap_content"
             tools:layout="@layout/fragment_boton_limitado" />
 
-        <TextView
+        <!--<TextView
             android:id="@+id/lblVotosRestantes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/StringLblVotosRestantes" />
+            android:text="@string/StringLblVotosRestantes" />-->
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

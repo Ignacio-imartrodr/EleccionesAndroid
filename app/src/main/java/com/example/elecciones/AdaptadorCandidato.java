@@ -8,8 +8,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class AdaptadorCliente extends ArrayAdapter<Candidato> {
-    public AdaptadorCliente(Context context, ArrayList<Candidato> candidatos) {
+public class AdaptadorCandidato extends ArrayAdapter<Candidato> {
+    public AdaptadorCandidato(Context context, ArrayList<Candidato> candidatos) {
         super(context, android.R.layout.simple_spinner_item, candidatos);
     }
     @Override

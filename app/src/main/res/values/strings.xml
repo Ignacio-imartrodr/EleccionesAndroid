@@ -8,7 +8,5 @@
     <string name="StringLblVotosRestantes">Votos restantes:</string>
     <string name="StringResult">Resultados</string>
     <string name="StringResetTablas">Reset Tablas</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="texto">Boton Limitado</string>
+    <string name="StringBtnLimitado">Boton Limitado</string>
 </resources>

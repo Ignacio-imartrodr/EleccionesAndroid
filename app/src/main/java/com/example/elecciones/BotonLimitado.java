@@ -106,42 +106,33 @@ public class BotonLimitado extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            texto = getArguments().getString(ARG_TEXTO);
+            texto = getArguments().getString(ARG_TEXTO, "");
             maxClicks = getArguments().getInt(ARG_MAX_CLICKS);
             mostrarRestantes = getArguments().getBoolean(ARG_MOSTRAR_RESTANTES);
             decremental = getArguments().getBoolean(ARG_DECREMENTAL);
             specialClicks = getArguments().getIntArray(ARG_SPECIAL_CLICKS);
         }
         numClicks = 0;
+        if (numClicks >= maxClicks){
+            boton.setEnabled(false);
+        }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflar el layout para este fragmento
-        View view = inflater.inflate(R.layout.fragment_boton_limitado, container, false);
-
-        // Obtener la referencia del botón definido en el XML
-        boton = view.findViewById(R.id.button);
-        if (texto != null) {
-            if (mostrarRestantes) {
-                if (decremental){
-                    boton.setText(String.format("%s %d/%d", texto, maxClicks, maxClicks));
-                } else {
-                    boton.setText(String.format("%s %d/%d", texto, numClicks, maxClicks));
-                }
-            } else {
-                boton.setText(texto);
-            }
-        }
-
-        return view;
+        return inflater.inflate(R.layout.fragment_boton_limitado, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        boton.setOnClickListener(v -> actiOnClick(v));
+        // Obtener la referencia del botón definido en el XML
+        boton = view.findViewById(R.id.button);
+        if (texto != null) {
+            actualizarTexto();
+        }
+        boton.setOnClickListener(this::actiOnClick);
     }
 
     @Override
@@ -152,22 +143,46 @@ public class BotonLimitado extends Fragment {
         }
     }
 
-    //Metodos
-    public <T extends ListenerBtnLim> void setListener(T listener){
+    @Override
+    public void onResume() {
+        super.onResume();
+        actualizarTexto();
+    }
+
+    //Getters y Setters
+    public void setListener(ListenerBtnLim listener){
         this.listener = listener;
+    }
+    public ListenerBtnLim getListener() { return listener; }
+    //Métodos
+    public void resetClicks(){
+        numClicks = 0;
+        actualizarTexto();
+        boton.setEnabled(true);
+    }
+    public void addMaxClicks(int cant) {
+        maxClicks += cant;
+        actualizarTexto();
+        boton.setEnabled(true);
     }
     private void actiOnClick(View v){
         if (listener == null) return;
         if (listener.isValidClick(v)){
+            numClicks++;
 
             listener.onValidClick(v);
 
-            if (numClicks == 0){
+            if (numClicks == 1){
                 listener.onFirstClick(v);
             }
 
             if (specialClicks != null){
-                listener.onSpecialClick(v);
+                for (int i = 0; i < specialClicks.length && i <= maxClicks ; i++) {
+                    if (numClicks == specialClicks[i]) {
+                        listener.onSpecialClick(v);
+                        break;
+                    }
+                }
             }
 
             listener.onNumClick(v, numClicks);
@@ -177,20 +192,22 @@ public class BotonLimitado extends Fragment {
                 boton.setEnabled(false);
             }
 
-            numClicks++;
-
-            if (mostrarRestantes){
-                if (decremental){
-                    boton.setText(String.format("%s %d/%d", texto, maxClicks - numClicks, maxClicks));
-                } else {
-                    boton.setText(String.format("%s %d/%d", texto, numClicks, maxClicks));
-                }
-            }
+            actualizarTexto();
+        } else {
+            listener.onInvalidClick(v);
         }
     }
-    public interface ListenerBtnLim{
-        abstract boolean isValidClick(View v);
-        abstract void onValidClick(View v);
+    private void actualizarTexto(){
+        String texto = this.texto;
+        if (mostrarRestantes){
+            texto = String.format("%s %d/%d", texto, decremental ? maxClicks - numClicks : numClicks, maxClicks);
+        }
+        boton.setText(texto);
+    }
+    public interface ListenerBtnLim {
+        boolean isValidClick(View v);
+        void onValidClick(View v);
+        default void onInvalidClick(View v) { }
         default void onLastClick(View v) { }
         default void onFirstClick(View v) { }
         default void onSpecialClick(View v) { }
