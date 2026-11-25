@@ -13,6 +13,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.util.List;
+
 public class ResultadosActivity extends AppCompatActivity {
     private AsistenteBD asisBD;
 
@@ -27,14 +29,10 @@ public class ResultadosActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        Candidato[] candidatos = asisBD.getCandidatos().toArray(new Candidato[0]);
-        String[] muestraCandidatos = new String[candidatos.length];
-        int i = 0;
-        for (Candidato c : candidatos) {
-            muestraCandidatos[i++] = c.toString() + " - " + "Votos: " + c.getNumVotos()  + " - Color: " + String.valueOf(c.getPartido().getColor());
-        }
+        List<Candidato> candidatos = asisBD.getCandidatos();
         ListView listaCandidatos = findViewById(R.id.listaCandidatos);
-        listaCandidatos.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, muestraCandidatos));
+        AdaptadorCandidato adapter = new AdaptadorCandidato(this, candidatos, true);
+        listaCandidatos.setAdapter(adapter);
     }
     @Override
     protected void onStart() {

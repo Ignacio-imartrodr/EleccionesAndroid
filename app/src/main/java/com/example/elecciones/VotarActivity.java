@@ -3,6 +3,8 @@ package com.example.elecciones;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -43,25 +45,28 @@ public class VotarActivity extends AppCompatActivity /*implements View.OnClickLi
         lblVotosRestantes = findViewById(R.id.lblVotosRestantes);
         lblVotosRestantes.setText(votosRestantes);*/
 
-        BotonLimitado miBoton = BotonLimitado.newInstance(getString(R.string.StringVotar), Usuario.NUMERO_VOTOS, true);
-        miBoton.setListener(new BotonLimitado.ListenerBtnLim() {
-            @Override
-            public boolean isValidClick(View v) {
-                return validarClick(v);
-            }
-            @Override
-            public void onInvalidClick(View v) {
-                actionInvalidClick(v);
-            }
-            @Override
-            public void onValidClick(View v) {
-                actionClick(v);
-            }
-            @Override
-            public void onLastClick(View v) {
-                guardarYSalir(v);
-            }
-        });
+        BotonLimitado miBoton = (BotonLimitado) getSupportFragmentManager().findFragmentById(R.id.frmBtnLimitado);
+        if (miBoton != null) {
+            miBoton.setConfig(getString(R.string.StringVotar), Usuario.NUMERO_VOTOS, true);
+            miBoton.setListener(new BotonLimitado.ListenerBtnLim() {
+                @Override
+                public boolean isValidClick(BotonLimitado fragment) {
+                    return validarClick(fragment);
+                }
+                @Override
+                public void onInvalidClick(BotonLimitado fragment) {
+                    actionInvalidClick(fragment);
+                }
+                @Override
+                public void onValidClick(BotonLimitado fragment) {
+                    actionClick(fragment);
+                }
+                @Override
+                public void onLastClick(BotonLimitado fragment) {
+                    guardarYSalir(fragment);
+                }
+            });
+        }
         //Button btnVotar = findViewById(R.id.btnVotar);
         //btnVotar.setOnClickListener(this);
 
@@ -70,21 +75,7 @@ public class VotarActivity extends AppCompatActivity /*implements View.OnClickLi
         List<Candidato> candidatos = asisBD.getCandidatos();
         candidatos.add(0, new Candidato(-1, "-- Selecciona un candidato --", null));
 
-        ArrayAdapter<Candidato> adapter = new ArrayAdapter<Candidato>(this, android.R.layout.simple_spinner_item, candidatos) {
-            @Override
-            public View getDropDownView(int position, View convertView, @NonNull android.view.ViewGroup parent) {
-                View v = super.getDropDownView(position, convertView, parent);
-                if (position == 0) {
-                    // Oculta la opción "-- Selecciona un candidato --" en el menú desplegable
-                    v.setVisibility(View.GONE);
-                    v.setLayoutParams(new android.widget.AbsListView.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, 0));
-                } else {
-                    v.setVisibility(View.VISIBLE);
-                    v.setLayoutParams(new android.widget.AbsListView.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
-                }
-                return v;
-            }
-        };
+        AdaptadorCandidato adapter = new AdaptadorCandidato(this, candidatos, false);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spCandidatos.setAdapter(adapter);
 
@@ -130,22 +121,28 @@ public class VotarActivity extends AppCompatActivity /*implements View.OnClickLi
         }
         return false;
     }*/
-    private boolean validarClick(View v) {
-        if (v.getId() == R.id.frmBtnLimitado){
+    private boolean validarClick(BotonLimitado fragment) {
+        if (fragment.getId() == R.id.frmBtnLimitado) {
             candidato = (Candidato) spCandidatos.getSelectedItem();
             return candidato != null && candidato.getId() != -1 && !votados.contains(candidato);
         }
         return false;
     }
-    private void actionInvalidClick(View v){
-        if (v.getId() == R.id.frmBtnLimitado){
-            Toast.makeText(this, "Selecciona algún candidato", Toast.LENGTH_SHORT).show();
+    private void actionInvalidClick(BotonLimitado fragment){
+        if (fragment.getId() == R.id.frmBtnLimitado) {
+            candidato = (Candidato) spCandidatos.getSelectedItem();
+            if (candidato == null || candidato.getId() == -1) {
+                Toast.makeText(this, "Selecciona algún candidato", Toast.LENGTH_SHORT).show();
+            } else if (votados.contains(candidato)) {
+                Toast.makeText(this, "Ya has seleccionado a este candidato", Toast.LENGTH_SHORT).show();
+            }
         }
     }
-    private void actionClick(View v) {
-        if (v.getId() == R.id.frmBtnLimitado){
+    private void actionClick(BotonLimitado fragment) {
+        if (fragment.getId() == R.id.frmBtnLimitado) {
             candidato = (Candidato) spCandidatos.getSelectedItem();
-            if (candidato == null) return;
+            if (candidato == null || candidato.getId() == -1) return;
+            candidato.addVoto();
             votados.add(candidato);
             ArrayAdapter<Candidato> adapter = (ArrayAdapter<Candidato>) spCandidatos.getAdapter();
             if (adapter != null) {
@@ -156,9 +153,8 @@ public class VotarActivity extends AppCompatActivity /*implements View.OnClickLi
             Toast.makeText(this, "Voto añadido", Toast.LENGTH_SHORT).show();
         }
     }
-    private void guardarYSalir(View v){
-
-        if (v.getId() == R.id.frmBtnLimitado){
+    private void guardarYSalir(BotonLimitado fragment){
+        if (fragment.getId() == R.id.frmBtnLimitado) {
             us.setHaVotado(true);
             if (actualizarBD()) {
                 setResult(RESULT_OK);
