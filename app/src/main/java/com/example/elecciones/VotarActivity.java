@@ -2,15 +2,11 @@ package com.example.elecciones;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -20,15 +16,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class VotarActivity extends AppCompatActivity /*implements View.OnClickListener*/ {
+public class VotarActivity extends AppCompatActivity {
     private AsistenteBD asisBD;
-    //private TextView lblVotosRestantes;
     private Spinner spCandidatos;
 
     private Set<Candidato> votados;
     private Usuario us;
     private Candidato candidato;
-    //private String votosRestantes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +35,6 @@ public class VotarActivity extends AppCompatActivity /*implements View.OnClickLi
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        /*votosRestantes = getString(R.string.StringLblVotosRestantes) + " " + Usuario.NUMERO_VOTOS;
-        lblVotosRestantes = findViewById(R.id.lblVotosRestantes);
-        lblVotosRestantes.setText(votosRestantes);*/
 
         BotonLimitado miBoton = (BotonLimitado) getSupportFragmentManager().findFragmentById(R.id.frmBtnLimitado);
         if (miBoton != null) {
@@ -67,8 +58,6 @@ public class VotarActivity extends AppCompatActivity /*implements View.OnClickLi
                 }
             });
         }
-        //Button btnVotar = findViewById(R.id.btnVotar);
-        //btnVotar.setOnClickListener(this);
 
         spCandidatos = findViewById(R.id.spCandidatos);
 
@@ -81,46 +70,6 @@ public class VotarActivity extends AppCompatActivity /*implements View.OnClickLi
 
         votados = new LinkedHashSet<>(Usuario.NUMERO_VOTOS);
     }
-
-    /*@Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.btnVotar) {
-            Candidato candidato = (Candidato) spCandidatos.getSelectedItem();
-            if (candidato == null || candidato.getId() == -1) {
-                Toast.makeText(getApplicationContext(), "Selecciona algún candidato", Toast.LENGTH_SHORT).show();
-            } else {
-                if (addVoto(candidato)) {
-                    ArrayAdapter<Candidato> adapter = (ArrayAdapter<Candidato>) spCandidatos.getAdapter();
-                    if (adapter != null) {
-                        adapter.remove(candidato); // Quita el candidato del adaptador
-                        adapter.notifyDataSetChanged(); // Actualiza la lista visible
-                    }
-                    spCandidatos.setSelection(0);
-                    Toast.makeText(this, "Voto añadido", Toast.LENGTH_SHORT).show();
-                    votosRestantes = getString(R.string.StringLblVotosRestantes) + " " + (Usuario.NUMERO_VOTOS - votados.size());
-                    lblVotosRestantes.setText(votosRestantes);
-                    if (votados.size() == Usuario.NUMERO_VOTOS) {
-                        us.setHaVotado(true);
-                        if (actualizarBD()) {
-                            setResult(RESULT_OK);
-                            finish();
-                        } else {
-                            Toast.makeText(this, "Error actualizando la base de datos", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                } else {
-                    Toast.makeText(this, "Selecciona un candidato que no hayas votado", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    }*/
-    /*private boolean addVoto(Candidato candidato) {
-        if (votados.size() != Usuario.NUMERO_VOTOS && votados.add(candidato)) {
-            candidato.addVoto();
-            return true;
-        }
-        return false;
-    }*/
     private boolean validarClick(BotonLimitado fragment) {
         if (fragment.getId() == R.id.frmBtnLimitado) {
             candidato = (Candidato) spCandidatos.getSelectedItem();
@@ -198,5 +147,4 @@ public class VotarActivity extends AppCompatActivity /*implements View.OnClickLi
         super.onDestroy();
         asisBD.close();
     }
-
 }
